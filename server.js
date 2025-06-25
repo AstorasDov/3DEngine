@@ -1,45 +1,48 @@
 const http = require('http');
-const path = require('path');
 const {readFile} = require('fs');
-
+const path = require('path');
 const read = (path) => {
     return new Promise((resolve,reject)=>{
         readFile(path,'utf-8',(err,data)=>{
             if(data){resolve(data);}
-            else {reject(err);}
+            else reject(err);
         });
     });
 }
 
 const server = http.createServer(async(req,res)=>{
     const extname = path.extname(req.url);
-
     switch(req.url){
         case "/":
-            const html = await read(path.join(__dirname,'client','index.html'));
-            res.write(html);
-            res.end();
+            const html = await read('./client/index.html');
+            res.writeHead(200,{"Content-Type":"text/html"});
+            res.end(html);
             break;
-        case "/api/loadModel":
-            const model = await read('./Model/model.obj');
-            const lines = model.split('\n');
-            const vertexData = lines.filter(line=>line.startsWith('v '));
-            const vertices = vertexData.map(v => v.replace(/^v\s+/, '').trim().split(/\s+/).map(Number));
+        case "/api/model":
+            const data = await read('./Model/model.obj');
+            const lines = data.split('\n');
 
-            res.end(JSON.stringify(vertices));
+            const vertexData = lines.filter(l=>l.startsWith('v '))
+            .map(l=>l.replace('v ',"").trim().split(' ').map(n=>parseFloat(n)));
+
+            const faceData = lines.filter(f=>f.startsWith('f '))
+            .map(f=>f.replace('f ',"").trim().split(' ').map(n=>parseFloat(n)));
+
+            res.writeHead(200,{"Content-Type":"application/json"});
+            res.end(JSON.stringify({v:vertexData,f:faceData}));
             break;
     }
 
     switch(extname){
-        case '.css':
+        case ".css":
             const css = await read(path.join(__dirname,'client',req.url));
-            res.write(css);
-            res.end();
+            res.writeHead(200,{"Content-type":"text/css"})
+            res.end(css);
             break;
-        case '.js':
+        case ".js":
             const js = await read(path.join(__dirname,'client',req.url));
-            res.write(js);
-            res.end();
+            res.writeHead(200, {"Content-Type": "application/javascript"});
+            res.end(js);
             break;
     }
 });
