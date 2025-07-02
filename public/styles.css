@@ -6,6 +6,7 @@ body{
     align-items: center;
     flex-direction: column;
     gap: 5px;
+    font-family: sans-serif;
 }
 
 #container,canvas{
@@ -22,4 +23,9 @@ canvas{
 #container{
     height: 130px;
     background-color: olivedrab;
+    color: white;
+    box-sizing: border-box;
+    padding: 10px;
+    font-size: 18px;
+    overflow-y: scroll;
 }
