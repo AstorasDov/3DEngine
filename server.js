@@ -21,6 +21,20 @@ const server = http.createServer(async (req,res)=>{
             res.write(html);
             res.end();
             break;
+        case "/api/modelData":
+            const data = await read('./model.obj');
+            const lines = data.split("\n");
+
+            const vertexData = lines.filter(l=>l.startsWith('v '))
+            .map(v=>v.replace("v ","").trim()).map(e=>e.split(" ")
+            .map(n=>parseFloat(n)));
+
+            const faceData = lines.filter(l=>l.startsWith("f "))
+            .map(f=>f.replace("f ","").trim()).map(e=>e.split(" ")
+            .map(e=>parseInt(e)));
+
+            res.end(JSON.stringify({v:vertexData,t:faceData,whole:data}));
+            break;
     }
 
     switch(extname){
