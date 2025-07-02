@@ -54,8 +54,19 @@ class Triangle {
         ctx.lineTo(canvas.width/2+pointC.x,canvas.height/2+pointC.y);
         ctx.closePath();
         ctx.stroke();
+    };fill(color,canvas,camera){
+        const pointA = this.a.onScreen(camera);
+        const pointB = this.b.onScreen(camera);
+        const pointC = this.c.onScreen(camera);
 
-        ctx.fillStyle = "orange";
+        const ctx = canvas.getContext('2d');
+        ctx.beginPath();
+        ctx.moveTo(canvas.width/2+pointA.x,canvas.height/2+pointA.y);
+        ctx.lineTo(canvas.width/2+pointB.x,canvas.height/2+pointB.y);
+        ctx.lineTo(canvas.width/2+pointC.x,canvas.height/2+pointC.y);
+        ctx.closePath();
+
+        ctx.fillStyle = color;
         ctx.fill();
     };normal(){
         const u = new Vector3(this.b.x-this.a.x,this.b.y-this.a.y,this.b.z-this.a.z);
@@ -91,8 +102,15 @@ const update = () => {
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0,0,canvas.width,canvas.height);
     triangles.forEach((t)=>{
-        if(t.normal().z  < -0.15){
+        const normal = t.normal();
+        const vectorToCamera = new Vector3(
+            userCamera.position.x - normal.x,
+            userCamera.position.y - normal.y,
+            userCamera.position.z - normal.z
+        );const dotProduct = normal.x * vectorToCamera.x + normal.y * vectorToCamera.y + normal.z * vectorToCamera.z;
+        if(dotProduct > 0){
             t.outline(canvas,userCamera);
+            t.fill("orange",canvas,userCamera);
         }
     });
 }
